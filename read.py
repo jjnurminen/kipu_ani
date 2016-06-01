@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Jun 01 15:02:43 2016
+TODO:
+input files are irregular (items not always tab separated)
+-> use regex for parsing? + sanity checks
+broken file e.g.
+C:/Users/HUS20664877/projects/kipu_ani/data/208_261114.txt
 
-@author: hus20664877
+@author: Jussi (jnu@iki.fi)
 """
 
 import glob
@@ -20,7 +24,8 @@ def procline(li):
     (time, events, energy, ani, animean, quality)
     or None if line cannot be parsed """
     lis = li.split('\t')
-    lis = [s.strip() for s in lis]        
+    lis = [s.strip() for s in lis]
+    print lis
     if not len(lis) == 7:
         return None
     time = lis[0]
@@ -41,7 +46,6 @@ def ani_array(lines):
     t0 = None
     for ind,li in enumerate(lines):
         lip = procline(li)
-        print lip
         if lip:
             (time, events, energy, ani, animean, quality) = lip
             if events == 'ALKU' or events == 'ALOITUS':
