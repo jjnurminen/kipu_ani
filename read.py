@@ -2,7 +2,7 @@
 """
 TODO:
 input files are irregular (items not always tab separated)
--> use regex for parsing? + sanity checks
+-> use regex for parsing? (2 or more spaces or tab?) + sanity checks
 broken file e.g.
 C:/Users/HUS20664877/projects/kipu_ani/data/208_261114.txt
 
