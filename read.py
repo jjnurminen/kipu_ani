@@ -9,6 +9,7 @@ C:/Users/HUS20664877/projects/kipu_ani/data/208_261114.txt
 @author: Jussi (jnu@iki.fi)
 """
 
+import re
 import glob
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,7 +24,9 @@ def procline(li):
     """ Takes one line, returns tuple:
     (time, events, energy, ani, animean, quality)
     or None if line cannot be parsed """
-    lis = li.split('\t')
+    # this is to work around irregular files:
+    # item separator can be either 2 or more whitespace chars OR a single tab    
+    lis = re.split('\s\s+|\t', li)
     lis = [s.strip() for s in lis]
     print lis
     if not len(lis) == 7:
@@ -46,6 +49,7 @@ def ani_array(lines):
     t0 = None
     for ind,li in enumerate(lines):
         lip = procline(li)
+        print lip
         if lip:
             (time, events, energy, ani, animean, quality) = lip
             if events == 'ALKU' or events == 'ALOITUS':
