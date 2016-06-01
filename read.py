@@ -34,30 +34,36 @@ def procline(li):
     return (time, events, energy, ani, animean, quality)
 
 def ani_array(lines):
-    """ Makes a numpy array from ani file.
-    Columns: energy, ani, animean, quality """
+    """ Makes a numpy array from ani file,
+    with columns: energy, ani, animean, quality 
+    returns index of zero time + the array """
     ar = None
-    for li in lines:
+    t0 = None
+    for ind,li in enumerate(lines):
         lip = procline(li)
+        print lip
         if lip:
             (time, events, energy, ani, animean, quality) = lip
+            if events == 'ALKU' or events == 'ALOITUS':
+                t0 = ind
             vals = [energy, ani, animean, quality]
             if ar is not None:            
                 ar = np.vstack((ar, vals))
             else:
                 ar = np.array(vals)
-    return ar
+    return t0, ar
         
 
 plt.figure()
-#for fn in glob.glob(DATA_PATH + '/' + '*txt'):
-print(fn)
-f = open(fn, 'r')
-lines = f.readlines()
-ar1 = ani_array(lines)        
-plt.plot(ar1[:,1])
-plt.show()
-raw_input('press enter...')
+for fn in glob.glob(DATA_PATH + '/' + '*txt'):
+    print(fn)
+    f = open(fn, 'r')
+    lines = f.readlines()
+    t0, ar1 = ani_array(lines)        
+    plt.plot(ar1[t0:t0+100,1])
+    plt.draw()
+    plt.waitforbuttonpress()
+    
 
 
     
