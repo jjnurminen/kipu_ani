@@ -116,62 +116,67 @@ def ani_array(lines):
     # experiment start in seconds (hand in water) relative to file start
     nar = np.array(ar)
     if not np.all(np.diff(nar[:,0]) == 1):
-        print('warning: time not uniformly sampled, delta t stats: ', end='')
+        print('warning: time not uniformly sampled, delta_t stats: ', end='')
         print(np.unique(np.diff(nar[:,0]), return_counts=True))
     return t_exp_start, nar
 
-def ani_plot():
-    T_BEFORE = 20  # sec before t0
-    T_AFTER = 160  # sec after t0
-    EXCLUDE_ZEROS = True  # exclude curves that fall to zero (errors?)
-    MAX_LINES = 1000  # do not read more data than this
-    
-    """ Plot t vs ANI curves """
-    plt.figure()
-    parse_errors = 0
-    files = glob.glob(DATA_PATH + '/' + '*txt')
-    nfiles = len(files)
-    avg = np.zeros(T_BEFORE+T_AFTER)
-    navg = 0
-    tvec = None
-    n_curves_zero = 0 
+T_BEFORE = 20  # sec before t0
+T_AFTER = 160  # sec after t0
+EXCLUDE_ZEROS = True  # exclude curves that fall to zero (errors?)
+MAX_LINES = 800  # do not read more data than this
 
-    for fn in files[:-1]:
-        print('Parsing:', fn)
-        f = open(fn, 'r')
-        lines = f.readlines()[:MAX_LINES]
-        try:
-            t_start_ind, ar1 = ani_array(lines)        
-        except ValueError as e:
-            print(e)
-            parse_errors += 1
+""" Plot t vs ANI curves """
+plt.figure()
+parse_errors = 0
+files = glob.glob(DATA_PATH + '/' + '*txt')
+nfiles = len(files)
+avg = np.zeros(T_BEFORE+T_AFTER)
+navg = 0
+tvec = None
+n_curves_zero = 0 
+
+for fn in files[:-1]:
+    print('Parsing:', fn)
+    f = open(fn, 'r')
+    lines = []
+    for k in range(MAX_LINES):
+        lines.append(f.readline())
+    try:
+        t_start_ind, ar1 = ani_array(lines)
+    except ValueError as e:
+        print('Cannot parse', fn, ':')
+        print(e)
+        parse_errors += 1
+        continue
+    if ar1.shape[0] < t_start_ind + T_AFTER:
+        raise ValueError('Not enough data was read! Increase MAX_LINES')
+    tvec = ar1[t_start_ind-T_BEFORE:t_start_ind+T_AFTER, 0]
+    tvec -= tvec[0]  # plot starts from zero
+    ani_data = ar1[t_start_ind-T_BEFORE:t_start_ind+T_AFTER, 2]
+    # do not plot or include in average, if curve falls to zero
+    if min(ani_data) == 0:
+        n_curves_zero += 1
+        if EXCLUDE_ZEROS:
+            print('Data falls to zero, excluding file')
             continue
-        tvec = ar1[t_start_ind-T_BEFORE:t_start_ind+T_AFTER, 0]
-        tvec -= tvec[0]  # plot starts from zero
-        ani_data = ar1[t_start_ind-T_BEFORE:t_start_ind+T_AFTER, 2]
-        # do not plot or include in average, if curve falls to zero
-        if min(ani_data) == 0:
-            n_curves_zero += 1
-            if EXCLUDE_ZEROS:
-                continue
-        avg += ani_data
-        navg += 1
-        plt.plot(tvec, ani_data)
-        plt.draw()
-        #plt.waitforbuttonpress()
-    
-    avg /= navg
-    plt.plot(tvec, avg, linewidth=3, color='k')
-    plt.axvline(T_BEFORE, linestyle='--', color='k')
-    plt.xlabel('Time (s)')
-    plt.ylabel('ANI index')
-    print('\nTotal files found:', nfiles)
-    print('Files with parse errors:', parse_errors)
-    print('Curves with ANI falling to zero:', n_curves_zero)
-    print('Plotted curves:', navg)
+    avg += ani_data
+    navg += 1
+    plt.plot(tvec, ani_data)
+    plt.draw()
+    #plt.waitforbuttonpress()
+
+avg /= navg
+plt.plot(tvec, avg, linewidth=3, color='k')
+plt.axvline(T_BEFORE, linestyle='--', color='k')
+plt.xlabel('Time (s)')
+plt.ylabel('ANI index')
+print('\nTotal files found:', nfiles)
+print('Files with parse errors:', parse_errors)
+print('Curves with ANI falling to zero:', n_curves_zero)
+print('Plotted curves:', navg)
    
-if __name__ == '__main__':
-    ani_plot()
+#if __name__ == '__main__':
+#    ani_plot()
     
 
 
