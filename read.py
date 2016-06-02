@@ -53,22 +53,21 @@ def procline(li):
     if not len(lis) in [6,7]:   # weird result of split, cannot parse
         return None
     time = lis[0]
-    # check for validity of time string
+    events = None
+    # try to handle invalid time strings
     if not is_time(time):
         if len(time) > 8:  # time and event glued together?
             if is_time(time[:8]):  
                 print('warning: overlong time string, splitting into time and event:', time)
                 time = time[:8]
-                event = time[8:]
+                events = time[8:]
             else:   # overlong time string, cannot parse
                 return None
         else:   # normal or short time string, but cannot parse
             return None
-    if len(lis) == 7:  # valid time followed by event
+    elif len(lis) == 7:  # valid time, followed by event
         events = lis[1].strip()
-        lis.pop(1)
-    else:  # len == 6, no event
-        events = None
+        lis.pop(1)  # so that indices below are always valid
     energy = float(lis[1])
     ani = int(lis[2])
     animean = int(lis[3])
