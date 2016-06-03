@@ -44,7 +44,7 @@ def is_time(timestr):
 def procline(li):
     """ Takes one line, returns tuple:
     (time, events, energy, ani, animean, quality)
-    or None if line cannot be parsed into the variables """
+    or None if line cannot be parsed """
     # this is to work around irregularly formatted lines:
     # item separator can be either 2 or more whitespace chars OR a single tab
     # (not a single space, since event strings may contain a space...)
@@ -68,10 +68,13 @@ def procline(li):
     elif len(lis) == 7:  # valid time, followed by event
         events = lis[1].strip()
         lis.pop(1)  # so that indices below are always valid
-    energy = float(lis[1])
-    ani = int(lis[2])
-    animean = int(lis[3])
-    quality = float(lis[4])
+    try:
+        energy = float(lis[1])
+        ani = int(lis[2])
+        animean = int(lis[3])
+        quality = float(lis[4])
+    except ValueError:
+        return None
     if events:
         assert not_a_number(events)
         events = events.upper()
@@ -109,7 +112,8 @@ def ani_array(lines):
             if parsed_a_line:
                 # ignore errors on last line
                 if ind != len(lines) - 1:
-                    raise ValueError('Cannot parse line: ' + li)
+                    #raise ValueError('Cannot parse line: ' + li)
+                    print('warning: skipping unparseable line: ' + li)
     if not t_exp_start:
         raise ValueError('Cannot parse t_exp_start')
     # experiment start in seconds (hand in water) relative to file start
@@ -121,7 +125,7 @@ def ani_array(lines):
 
 T_BEFORE = 20  # sec before t0
 T_AFTER = 160  # sec after t0
-EXCLUDE_ZEROS = True  # exclude curves that fall to zero (errors?)
+EXCLUDE_ZEROS = False  # exclude curves that fall to zero (errors?)
 MAX_LINES = 800  # do not read more data than this
 
 """ Plot t vs ANI curves """
