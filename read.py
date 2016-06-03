@@ -153,8 +153,9 @@ for fn in files[:-1]:
         continue
     if ar1.shape[0] < t_start_ind + T_AFTER:
         raise ValueError('Not enough data was read! Increase MAX_LINES')
+    # time vector may be unique for each curve due to nonuniform sampling
     tvec = ar1[t_start_ind-T_BEFORE:t_start_ind+T_AFTER, 0]
-    tvec -= tvec[0]  # plot starts from zero
+    tvec -= tvec[0]  # plot starts from zero time
     ani_data = ar1[t_start_ind-T_BEFORE:t_start_ind+T_AFTER, 2]
     # do not plot or include in average, if curve falls to zero
     if min(ani_data) == 0:
