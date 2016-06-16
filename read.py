@@ -125,12 +125,19 @@ def ani_array(lines):
 
 T_BEFORE = 20  # sec before t0
 T_AFTER = 160  # sec after t0
-EXCLUDE_ZEROS = False  # exclude curves that fall to zero (errors?)
+EXCLUDE_ZEROS = True  # exclude curves that fall to zero (errors?)
 MAX_LINES = 800  # do not read more data than this
+FN_EXCLUDE = 'exclude.txt'
+
+""" Read exclude file """
+f = open(FN_EXCLUDE, 'r')
+fn_exclude = [fn.strip() for fn in f.readlines()]  # rm whitespace
+
 
 """ Plot t vs ANI curves """
 plt.figure()
 parse_errors = 0
+list_excluded = 0
 files = glob.glob(DATA_PATH + '/' + '*txt')
 nfiles = len(files)
 avg = np.zeros(T_BEFORE+T_AFTER)
@@ -139,6 +146,11 @@ tvec = None
 n_curves_zero = 0 
 
 for fn in files[:-1]:
+    fnbase = os.path.splitext(os.path.basename(fn))[0]
+    if fnbase in fn_exclude:
+        print('Name in exclude list, skipping:', fn)
+        list_excluded += 1
+        continue
     print('Parsing:', fn)
     f = open(fn, 'r')
     lines = []
@@ -175,6 +187,7 @@ plt.axvline(T_BEFORE, linestyle='--', color='k')
 plt.xlabel('Time (s)')
 plt.ylabel('ANI index')
 print('\nTotal files found:', nfiles)
+print('Excluded by list:', list_excluded)
 print('Files with parse errors:', parse_errors)
 print('Curves with ANI falling to zero:', n_curves_zero)
 print('Plotted curves:', navg)
